@@ -3,7 +3,6 @@ import pprint
 import json
 
 DATA_DIR = "a2_data\\"
-TRAINING_FILE = "sents.train"
 SPECIAL_START = "<S>"
 SPECIAL_END = "/<S>"
 PREV_TAG_V_TAG_COUNT_FILENAME = 'result_count_prev_tag_tag.json'
@@ -16,21 +15,25 @@ COUNT_TAG = "count_total_tag"
 COUNT_T_V_W = "count_t_v_w"
 PROB_PREV_TAG_V_TAG = "prob_tag_v_prev_tag"
 PROB_T_V_W = "prob_w_v_t"
-OUTFILE_NAME = "model_file"
 pp = pprint.PrettyPrinter()
 
 
-def train_tagger():
-    count_t_v_w, count_prev_t_v_t, count_tag = __count_bi_word()
+def train_tagger(training_file, devt_file, out_file):
+    count_t_v_w, count_prev_t_v_t, count_tag = __count_bi_word(training_file)
     prob_t_given_prev_t, prob_w_given_t = __count_cond_probabilities(count_t_v_w, count_prev_t_v_t, count_tag)
-    out_dict = {COUNT_T_V_W: count_t_v_w, COUNT_PREV_TAG_V_TAG: count_prev_t_v_t, COUNT_TAG: count_tag,
-                PROB_PREV_TAG_V_TAG: prob_t_given_prev_t, PROB_T_V_W: prob_w_given_t}
-    __write_out_file(out_dict, OUTFILE_NAME)
+    out_dict = {
+        COUNT_T_V_W: count_t_v_w,
+        COUNT_PREV_TAG_V_TAG: count_prev_t_v_t,
+        COUNT_TAG: count_tag,
+        PROB_PREV_TAG_V_TAG: prob_t_given_prev_t,
+        PROB_T_V_W: prob_w_given_t
+    }
+    __write_out_file(out_dict, out_file)
 
 
-def __count_bi_word():
+def __count_bi_word(training_file):
     total_word_count, count_previous_t_against_t, count_tag_against_word, count_tag = 0, {}, {}, {}
-    training_set = open(os.path.join(os.getcwd(), DATA_DIR + TRAINING_FILE))
+    training_set = open(os.path.join(os.getcwd(), DATA_DIR + training_file))
     for line in training_set:
         line_list = line.rstrip().split(" ")
         total_word_count += len(line_list)
