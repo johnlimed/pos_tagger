@@ -1,6 +1,5 @@
-import os.path
 import pprint
-import json
+import tagger.utils as utils
 
 FILE_DIR = "tagger"
 COUNT_PREV_TAG_V_TAG = "count_prev_tag_v_tag"
@@ -20,10 +19,6 @@ pp = pprint.PrettyPrinter()
 
 
 def test_tagger(test_file, in_filename, out_file):
-    stats_dict = __read_stats(in_filename)
+    stats_dict = utils.read_file(in_filename)
     # pp.pprint(stats_dict)
 
-
-def __read_stats(in_filename):
-    data = open(in_filename).read()
-    return json.loads(data)

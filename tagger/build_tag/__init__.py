@@ -1,6 +1,5 @@
-import os.path
 import pprint
-import json
+import tagger.utils as utils
 
 DATA_DIR = "a2_data\\"
 SPECIAL_START = "<S>"
@@ -28,7 +27,7 @@ def train_tagger(training_file, devt_file, out_file):
         PROB_PREV_TAG_V_TAG: prob_t_given_prev_t,
         PROB_T_V_W: prob_w_given_t
     }
-    __write_out_file(out_dict, out_file)
+    utils.write_out_file(out_dict, out_file)
 
 
 def __count_bi_word(training_file):
@@ -64,9 +63,9 @@ def __count_bi_word(training_file):
             # break
     # pp.pprint(count_tag_against_word)
     # pp.pprint(count_previous_t_against_t)
-    __write_out_file(count_tag_against_word, TAG_WORD_COUNT_FILENAME)
-    __write_out_file(count_previous_t_against_t, PREV_TAG_V_TAG_COUNT_FILENAME)
-    __write_out_file(count_tag, COUNT_TAG_FILENAME)
+    utils.write_out_file(count_tag_against_word, TAG_WORD_COUNT_FILENAME)
+    utils.write_out_file(count_previous_t_against_t, PREV_TAG_V_TAG_COUNT_FILENAME)
+    utils.write_out_file(count_tag, COUNT_TAG_FILENAME)
     return count_tag_against_word, count_previous_t_against_t, count_tag
 
 
@@ -96,11 +95,6 @@ def __count_tag_against_word(count_tag_against_word, word, tag, count_tag, no_pa
             count_tag[tag] = 1
 
 
-def __write_out_file(to_write_out, outfile_name):
-    with open(outfile_name, 'w') as outfile:
-        json.dump(to_write_out, outfile, indent=4)
-
-
 def __count_cond_probabilities(count_t_v_w, count_prev_t_v_t, count_tag):
     prob_t_given_prev_t, prob_w_given_t = {}, {}
     for tag in count_t_v_w:
@@ -113,6 +107,6 @@ def __count_cond_probabilities(count_t_v_w, count_prev_t_v_t, count_tag):
             prob_t_given_prev_t[prev_tag][tag] = count_prev_t_v_t[prev_tag][tag] / float(count_tag[prev_tag])
     # pp.pprint(prob_w_given_t)
     # pp.pprint(prob_t_given_prev_t)
-    __write_out_file(prob_t_given_prev_t, PROB_TAG_GIVEN_PREV_TAG_FILENAME)
-    __write_out_file(prob_w_given_t, PROB_WORD_GIVEN_TAG_FILENAME )
+    utils.write_out_file(prob_t_given_prev_t, PROB_TAG_GIVEN_PREV_TAG_FILENAME)
+    utils.write_out_file(prob_w_given_t, PROB_WORD_GIVEN_TAG_FILENAME )
     return prob_t_given_prev_t, prob_w_given_t
