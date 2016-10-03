@@ -22,7 +22,7 @@ if __name__ == "__main__":
             else:
                 print "error... training file: " + training_file_path + " not found"
         elif cmd == "run_tagger":
-            test_file_path = os.path.join(wk_dir, DATA_DIR, sys.argv[2])
+            test_file_path = os.path.join(wk_dir, FILE_DIR, DATA_DIR, sys.argv[2])
             out_model_file_path = os.path.join(wk_dir, FILE_DIR, sys.argv[3])
             out_file = sys.argv[4]
             if utils.check_file(test_file_path) or utils.check_file(out_model_file_path):

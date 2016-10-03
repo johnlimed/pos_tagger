@@ -1,7 +1,6 @@
 import pprint
 import tagger.utils as utils
 
-DATA_DIR = "a2_data\\"
 SPECIAL_START = "<S>"
 SPECIAL_END = "/<S>"
 PREV_TAG_V_TAG_COUNT_FILENAME = 'result_count_prev_tag_tag.json'
