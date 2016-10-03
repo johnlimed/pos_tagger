@@ -33,7 +33,7 @@ def train_tagger(training_file, devt_file, out_file):
 
 def __count_bi_word(training_file):
     total_word_count, count_previous_t_against_t, count_tag_against_word, count_tag = 0, {}, {}, {}
-    training_set = open(os.path.join(os.getcwd(), DATA_DIR + training_file))
+    training_set = open(training_file)
     for line in training_set:
         line_list = line.rstrip().split(" ")
         total_word_count += len(line_list)

@@ -25,5 +25,5 @@ def test_tagger(test_file, in_filename, out_file):
 
 
 def __read_stats(in_filename):
-    data = open(os.path.join(os.getcwd(), FILE_DIR, in_filename)).read()
+    data = open(in_filename).read()
     return json.loads(data)
