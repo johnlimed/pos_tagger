@@ -5,23 +5,25 @@ FILE_DIR = "tagger"
 COUNT_PREV_TAG_V_TAG = "count_prev_tag_v_tag"
 COUNT_TAG = "count_total_tag"
 COUNT_T_V_W = "count_t_v_w"
+COUNT_W_V_T = "count_w_v_t"
 PROB_PREV_TAG_V_TAG = "prob_tag_v_prev_tag"
-PROB_T_V_W = "prob_w_v_t"
+PROB_W_V_T = "prob_w_v_t"
 SPECIAL_START = "<S>"
 SPECIAL_END = "/<S>"
 pp = pprint.PrettyPrinter()
 
 # stats_dict = {
-    #     COUNT_T_V_W: count_t_v_w,
-    #     COUNT_PREV_TAG_V_TAG: count_prev_t_v_t,
-    #     COUNT_TAG: count_tag,
-    #     PROB_PREV_TAG_V_TAG: prob_t_given_prev_t,
-    #     PROB_T_V_W: prob_w_given_t
-    # }
+#     PROB_PREV_TAG_V_TAG: prob_t_given_prev_t,
+#     PROB_W_V_T: prob_w_given_t
+# }
 
 
 def test_tagger(test_file, in_filename, out_file):
     stats_dict = utils.read_file(in_filename)
+    prob_w_v_t = stats_dict[PROB_W_V_T]
+    prob_t_v_t = stats_dict[PROB_PREV_TAG_V_TAG]
+    viterbi = {}
+    backpointer = {}
     # pp.pprint(stats_dict)
     in_file = open(test_file)
     for line in in_file:
@@ -30,3 +32,16 @@ def test_tagger(test_file, in_filename, out_file):
         word_list.append(SPECIAL_END)
         for idx, word in enumerate(word_list):
             print idx, word
+            if word in prob_w_v_t:
+                max_prob = 0
+                for tag in prob_w_v_t[word]:
+                    viterbi[idx, tag] = prob_w_v_t[word][tag]
+                print prob_w_v_t[word]
+            else:
+                __determine_unknown_prob(word)
+
+
+def __determine_unknown_prob(unknown_word):
+    print "unknown word... " + unknown_word
+    prob = 0*unknown_word
+    return prob
