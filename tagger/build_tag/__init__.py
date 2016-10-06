@@ -26,7 +26,7 @@ def train_tagger(training_file, devt_file, out_file):
         # COUNT_T_V_W: count_t_v_w,
         # COUNT_W_V_T: count_w_v_t,
         # COUNT_PREV_TAG_V_TAG: count_prev_t_v_t,
-        # COUNT_TAG: count_tag,
+        COUNT_TAG: count_tag,
         PROB_PREV_TAG_V_TAG: prob_t_given_prev_t,
         PROB_W_V_T: prob_w_given_t
     }
@@ -114,7 +114,8 @@ def __count_word_against_tag(count_word_against_tag, word, tag, no_pass):
 
 def __count_cond_probabilities(count_t_v_w, count_w_v_t, count_prev_t_v_t, count_tag):
     prob_t_given_prev_t, prob_w_given_t, prob_t_given_w = {}, {}, {}
-    for tag in count_tag:
+
+    for tag in count_tag.keys():
         for word in count_w_v_t:
             if word not in prob_w_given_t:
                 prob_w_given_t[word] = {}
@@ -122,14 +123,23 @@ def __count_cond_probabilities(count_t_v_w, count_w_v_t, count_prev_t_v_t, count
                 prob_w_given_t[word][tag] = count_w_v_t[word][tag] / float(count_tag[tag])
             else:
                 prob_w_given_t[word][tag] = 0
+        for prev_tag in count_prev_t_v_t:
+            if prev_tag not in prob_t_given_prev_t:
+                prob_t_given_prev_t[prev_tag] = {}
+            if tag in count_prev_t_v_t[prev_tag].keys():
+                prob_t_given_prev_t[prev_tag][tag] = count_prev_t_v_t[prev_tag][tag] / float(count_tag[prev_tag])
+            else:
+                prob_t_given_prev_t[prev_tag][tag] = 0
+
+            # for tag in count_prev_t_v_t[prev_tag]:
+            #     prob_t_given_prev_t[prev_tag][tag] = count_prev_t_v_t[prev_tag][tag] / float(count_tag[prev_tag])
+
+    # __cal_unigram(count_tag, count_w_v_t, prob_w_given_t)
     # for word in count_w_v_t:
     #     prob_w_given_t[word] = {}
     #     for tag in count_w_v_t[word]:
     #         prob_w_given_t[word][tag] = count_w_v_t[word][tag] / float(count_tag[tag])
-    for prev_tag in count_prev_t_v_t:
-        prob_t_given_prev_t[prev_tag] = {}
-        for tag in count_prev_t_v_t[prev_tag]:
-            prob_t_given_prev_t[prev_tag][tag] = count_prev_t_v_t[prev_tag][tag] / float(count_tag[prev_tag])
+
     # for tag in count_t_v_w:
     #     prob_t_given_w[tag] = {}
     #     for word in count_t_v_w[tag]:
@@ -139,3 +149,11 @@ def __count_cond_probabilities(count_t_v_w, count_w_v_t, count_prev_t_v_t, count
     utils.write_out_file(prob_t_given_prev_t, PROB_TAG_GIVEN_PREV_TAG_FILENAME)
     utils.write_out_file(prob_w_given_t, PROB_WORD_GIVEN_TAG_FILENAME)
     return prob_t_given_prev_t, prob_w_given_t
+
+
+def __cal_unigram(count_tag, count_w_v_t, prob_w_given_t):
+    pass
+
+
+def __cal_bigram():
+    pass
