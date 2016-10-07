@@ -23,7 +23,6 @@ def train_tagger(training_file, devt_file, out_file):
     count_t_v_w, count_w_v_t, count_t_v_prev_t, count_prev_t_v_t, count_tag = __count_bi_word(training_file)
     prob_t_given_prev_t, prob_w_given_t = __count_cond_probabilities(count_w_v_t, count_t_v_prev_t, count_tag)
     out_dict = {
-        # COUNT_W_V_T: count_w_v_t,
         COUNT_PREV_TAG_V_TAG:  count_prev_t_v_t,
         COUNT_TAG: count_tag,
         PROB_TAG_V_PREV_TAG: prob_t_given_prev_t,
