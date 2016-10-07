@@ -14,87 +14,59 @@ SPECIAL_END = "/<S>"
 pp = pprint.PrettyPrinter()
 
 
-# stats_dict = {
-#     PROB_PREV_TAG_V_TAG: prob_t_given_prev_t,
-#     PROB_W_V_T: prob_w_given_t
-# }
-
-
 def test_tagger(test_file, in_filename, out_file):
     stats_dict = utils.read_file(in_filename)
+    count_t_v_t = stats_dict[COUNT_PREV_TAG_V_TAG]
     prob_w_v_t = stats_dict[PROB_W_V_T]
     prob_t_v_t = stats_dict[PROB_PREV_TAG_V_TAG]
-    pos_tags = stats_dict[COUNT_TAG].keys()
-    # pp.pprint(stats_dict)
+    pos_tags = stats_dict[COUNT_TAG].keys()[:-1]
+    out_line = ""
     in_file = open(test_file)
     for line in in_file:
         word_list = line.rstrip().split(" ")
-        word_list.insert(0, SPECIAL_START)
-        word_list.append(SPECIAL_END)
-        viterbi = {0: [(1, SPECIAL_START)], 1: []}
-        backpointer = {"start"}
-        backpointer.add(SPECIAL_START)
-        for tag in pos_tags[1:-1]:
-            viterbi[1].append((math.log1p(prob_w_v_t[word_list[1]][tag]), tag))
-        for idx, word in enumerate(word_list[2:]):
-            viterbi[idx + 2] = []
-            for tag in pos_tags[:-1]:
-                # print "we are at: " + str(idx+2)
-                # print "and tag: " + tag + " and word " + word
-                if word in prob_w_v_t:
-                    # print "prob w_v_t: " + str(prob_w_v_t[word][tag])
-                    viterbi[idx + 2].append(__det_tag_prob(viterbi[idx + 1], prob_t_v_t[tag], prob_w_v_t[word][tag],
-                                                           backpointer))
-                else:
-                    print "FAILLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLL"
-                    # TODO: make unknown words work
-                    break
-                    # break
-                    # break
-                    # print viterbi[idx+2]
-        # break
-        pprint.pprint(viterbi)
-        print backpointer
-        # viterbi[idx].append()
-        # print word, idx
-
-
-        # for idx, word in enumerate(word_list[:-1]):
-        #     print idx, word
-        #     if idx == 0:
-        #         viterbi[0] = 1, SPECIAL_START
-        #         print "probability: " + str(viterbi[idx])
-        #     else:
-        #         if word in prob_w_v_t:
-        #             viterbi[idx] = 0, ""
-        #             for tag in prob_w_v_t[word]:
-        #                 if prob_w_v_t[word][tag] > viterbi[idx][0]:
-        #                     viterbi[idx] = prob_w_v_t[word][tag], tag
-        #             print "probability: " + str(viterbi[idx][0]) + " and should be the tag: " + viterbi[idx][1]
-        #
-        #             # for tag in prob_w_v_t[word]:
-        #             #     viterbi[idx, tag] = prob_w_v_t[word][tag]
-        #             # print prob_w_v_t[word]
-        #         else:
-        #             __determine_unknown_prob(word)
-
-
-def __det_tag_prob(list_of_prev_prob, list_prob_t_v_t, prob_w_given_tag, backpointer):
-    # TODO: If prev prob tag is UNKN, determine most likely tag
-    max_prob = (0, "NN")
-    # max_prob = (float("-Infinity"), "")
-    # print list_prob_t_v_t
-    for tuple_prob in list_of_prev_prob:
-        # print "tuple prob: " + str(tuple_prob)
-        prob = math.log1p(tuple_prob[0]) + math.log1p(list_prob_t_v_t[tuple_prob[1]] + math.log1p(prob_w_given_tag))
-        if prob > max_prob[0]:
-            max_prob = (prob, tuple_prob[1])
-            backpointer.add(tuple_prob[1])
-    # print "Max prob: " + str(max_prob[0])
-    return max_prob
-
-
-def __determine_unknown_prob(unknown_word):
-    print "unknown word... " + unknown_word
-    prob = 0 * unknown_word
-    return prob
+        num_of_words = len(word_list)
+        # pos_tags.insert(0, SPECIAL_START)
+        # pos_tags.append(SPECIAL_END)
+        best_score = {}
+        best_edge = {}
+        best_score["0 " + SPECIAL_START] = 0
+        best_edge["0 " + SPECIAL_START] = None
+        for idx, word in enumerate(word_list):
+            for pre_tag in pos_tags:
+                for next_tag in pos_tags:
+                    if str(idx) + " " + pre_tag in best_score and pre_tag in count_t_v_t and next_tag in count_t_v_t[pre_tag]:
+                        if word in prob_w_v_t:
+                            score = best_score[str(idx) + " " + pre_tag] + -(
+                                math.log(prob_t_v_t[next_tag][pre_tag])) + -(math.log(prob_w_v_t[word][next_tag]))
+                        else:
+                            "print unknown word"
+                            score = best_score[str(idx) + " " + pre_tag] + -(
+                                math.log(prob_t_v_t[next_tag][pre_tag])) + -(math.log(8e-50))
+                        if str(idx + 1) + " " + next_tag not in best_score or best_score[
+                                            str(idx + 1) + " " + next_tag] > score:
+                            best_score[str(idx + 1) + " " + next_tag] = score
+                            best_edge[str(idx + 1) + " " + next_tag] = str(idx) + " " + pre_tag
+        for tag in pos_tags:
+            curr_node = str(num_of_words)+" "+tag
+            next_node = str(num_of_words+1)+" "+SPECIAL_END
+            if curr_node in best_score and tag in count_t_v_t and SPECIAL_END in count_t_v_t[tag]:
+                score = best_score[curr_node] + -(math.log(prob_t_v_t[SPECIAL_END][tag]))
+                if next_node not in best_score or best_score[next_node] > score:
+                    best_score[next_node] = score
+                    best_edge[next_node] = curr_node
+        # backtracing
+        tags = []
+        next_edge = best_edge[str(num_of_words+1) + " " + SPECIAL_END]
+        while next_edge is not None:
+            position, tag = next_edge.split(" ")
+            tags.append(tag)
+            next_edge = best_edge[next_edge]
+            # print next_edge
+        tags.reverse()
+        tags.pop(0)
+        for idx, word in enumerate(word_list):
+            out_line += word+"/"+tags[idx]+" "
+        out_line += "\n"
+    print out_line
+    with open(out_file, "w") as write_file:
+        write_file.write(out_line)

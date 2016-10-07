@@ -24,7 +24,7 @@ if __name__ == "__main__":
         elif cmd == "run_tagger":
             test_file_path = os.path.join(wk_dir, FILE_DIR, DATA_DIR, sys.argv[2])
             out_model_file_path = os.path.join(wk_dir, FILE_DIR, sys.argv[3])
-            out_file = sys.argv[4]
+            out_file = os.path.join(wk_dir, FILE_DIR, sys.argv[4])
             if utils.check_file(test_file_path) or utils.check_file(out_model_file_path):
                 print "running tagger: " + test_file_path + " " + out_model_file_path + " " + out_file
                 test.test_tagger(test_file_path, out_model_file_path, out_file)
